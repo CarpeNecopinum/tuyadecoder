@@ -8,6 +8,7 @@ Primarily meant to be used with [Rustuya Bridge](https://github.com/3735943886/r
 
 The program expects two environment variables to be set (or configured in an .env file):
 
+| name        | description                                                           |
 |-------------|-----------------------------------------------------------------------|
 | MQTT_BROKER | URL of your MQTT broker, can include username and password, if needed |
 | DEVICE_ID   | The id of the Tuya device you're working with                         |
