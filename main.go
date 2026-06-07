@@ -72,7 +72,10 @@ func main() {
 	}
 	dm.RegisterOn(c)
 
-	pvdc := handlers.PVDCDataHandler{ListenTopic: path.Join("tuya", device, "101/state")}
+	pvdc := handlers.PVDCDataHandler{
+		ListenTopic: path.Join("tuya", device, "101/state"),
+		OutputTopic: path.Join("tuyadecoder", device),
+	}
 	pvdc.RegisterOn(c)
 
 	log.Println("Subscribed")
