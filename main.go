@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
+	"main/handlers"
 	"os"
 	"os/signal"
 	"path"
 	"syscall"
 	"time"
-
-	"main/handlers"
 
 	"github.com/dsnet/try"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -52,11 +51,11 @@ func main() {
 
 	opts := mqtt.NewClientOptions().
 		AddBroker(broker).
-		SetClientID(clientid).
-		SetKeepAlive(2 * time.Second).
+		SetClientID(fmt.Sprintf("tuyadecoder-%d", time.Now().UnixNano())).
+		SetKeepAlive(4 * time.Second).
 		SetDefaultPublishHandler(onMessage).
 		SetConnectionNotificationHandler(onConnection).
-		SetPingTimeout(1 * time.Second)
+		SetPingTimeout(2 * time.Second)
 
 	c := mqtt.NewClient(opts)
 	connect_token := c.Connect()
@@ -69,6 +68,7 @@ func main() {
 	dm := handlers.DischargeModeHandler{
 		ListenTopic: path.Join("tuya", device, "106/state"),
 		OutputTopic: path.Join("tuyadecoder", device),
+		DeviceId:    device,
 	}
 	dm.RegisterOn(c)
 
