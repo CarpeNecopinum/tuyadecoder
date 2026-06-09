@@ -1,0 +1,6 @@
+services:
+    app:
+        build: .
+        image: tuyadecoder
+        restart: always
+        env_file: .env
