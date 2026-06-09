@@ -6,7 +6,6 @@ import (
 	"main/handlers"
 	"os"
 	"os/signal"
-	"path"
 	"syscall"
 	"time"
 
@@ -62,21 +61,14 @@ func main() {
 	connect_token.Wait()
 	try.E(connect_token.Error())
 
-	dcm := handlers.DCMessageHandler{ListenTopic: path.Join("tuya", device, "33/state")}
-	dcm.RegisterOn(c)
+	hnds := make([]handlers.Handler, 3)
+	hnds[0] = &handlers.DCMessageHandler{DeviceId: device}
+	hnds[1] = &handlers.DischargeModeHandler{DeviceId: device}
+	hnds[2] = &handlers.PVDCDataHandler{DeviceId: device}
 
-	dm := handlers.DischargeModeHandler{
-		ListenTopic: path.Join("tuya", device, "106/state"),
-		OutputTopic: path.Join("tuyadecoder", device),
-		DeviceId:    device,
+	for _, h := range hnds {
+		h.RegisterOn(c)
 	}
-	dm.RegisterOn(c)
-
-	pvdc := handlers.PVDCDataHandler{
-		ListenTopic: path.Join("tuya", device, "101/state"),
-		OutputTopic: path.Join("tuyadecoder", device),
-	}
-	pvdc.RegisterOn(c)
 
 	log.Println("Subscribed")
 

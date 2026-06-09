@@ -12,9 +12,7 @@ import (
 )
 
 type DischargeModeHandler struct {
-	ListenTopic string
-	OutputTopic string
-	DeviceId    string
+	DeviceId string
 
 	lastState []byte
 }
@@ -58,22 +56,23 @@ func struct2bin(src any) ([]byte, error) {
 
 func (s *DischargeModeHandler) RegisterOn(c mqtt.Client) {
 	defer try.F(log.Println)
-	tok1 := c.Subscribe(s.ListenTopic, 1, func(c mqtt.Client, m mqtt.Message) {
+
+	listen_topic := path.Join(InputPrefix, s.DeviceId, "106", "state")
+	rate_topic := path.Join(OutputPrefix, s.DeviceId, "output_rate")
+
+	tok1 := c.Subscribe(listen_topic, 1, func(c mqtt.Client, m mqtt.Message) {
 		defer try.F(log.Println)
 		data := DischargeMode{}
 
 		s.lastState = ParseBase64(m.Payload())
 		try.E(bin2struct(s.lastState, &data))
 
-		log.Printf("Read DischargeMode: %+v\n", data)
-
-		or_topic := path.Join(s.OutputTopic, "output_rate", "state")
+		or_topic := path.Join(rate_topic, "state")
 		tok := c.Publish(or_topic, 1, false, strconv.Itoa(int(data.Power0)))
 		tok.Wait()
 		try.E(tok.Error())
-		log.Printf("Reported output_rate")
 	})
-	cmd_topic := path.Join(s.OutputTopic, "output_rate", "set")
+	cmd_topic := path.Join(rate_topic, "set")
 	tok2 := c.Subscribe(cmd_topic, 1, func(c mqtt.Client, m mqtt.Message) {
 		defer try.F(log.Println)
 		if s.lastState == nil {

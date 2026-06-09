@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/dsnet/try"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 func removeFrom(arr []byte, val byte) []byte {
@@ -51,4 +52,11 @@ func SetDpJson(device, dp, value string) []byte {
 		log.Println("Error Marshalling set command: ", err)
 	}
 	return bs
+}
+
+const InputPrefix = "tuya"
+const OutputPrefix = "tuyadecoder"
+
+type Handler interface {
+	RegisterOn(c mqtt.Client)
 }

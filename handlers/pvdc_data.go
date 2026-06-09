@@ -12,8 +12,7 @@ import (
 )
 
 type PVDCDataHandler struct {
-	ListenTopic string
-	OutputTopic string
+	DeviceId string
 }
 
 type PVDCData struct {
@@ -28,7 +27,10 @@ type PVDCData struct {
 }
 
 func (s *PVDCDataHandler) RegisterOn(c mqtt.Client) {
-	tok := c.Subscribe(s.ListenTopic, 1, func(c mqtt.Client, m mqtt.Message) {
+	listen_topic := path.Join(InputPrefix, s.DeviceId, "101", "state")
+	output_base := path.Join(OutputPrefix, s.DeviceId)
+
+	tok := c.Subscribe(listen_topic, 1, func(c mqtt.Client, m mqtt.Message) {
 		defer try.F(log.Println)
 
 		data := PVDCData{}
@@ -37,9 +39,9 @@ func (s *PVDCDataHandler) RegisterOn(c mqtt.Client) {
 
 		log.Printf("Read PVDCData: %+v\n", data)
 
-		s1_topic := path.Join(s.OutputTopic, "solar_power0", "state")
+		s1_topic := path.Join(output_base, "solar_power0", "state")
 		tok1 := c.Publish(s1_topic, 1, false, strconv.Itoa(int(data.SolarPower0)))
-		s2_topic := path.Join(s.OutputTopic, "solar_power1", "state")
+		s2_topic := path.Join(output_base, "solar_power1", "state")
 		tok2 := c.Publish(s2_topic, 1, false, strconv.Itoa(int(data.SolarPower1)))
 
 		tok1.Wait()
