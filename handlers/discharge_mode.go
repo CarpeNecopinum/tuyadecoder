@@ -54,6 +54,9 @@ func struct2bin(src any) ([]byte, error) {
 
 }
 
+// All but the first slot disabled, first slot covers whole day, 82W
+const lastStateDefault = "AAEAABc7AFIAAAABIAMgAAAAASADIAAAAAEgAyAAAAABIAMg"
+
 func (s *DischargeModeHandler) RegisterOn(c mqtt.Client) {
 	defer try.F(log.Println)
 
@@ -76,7 +79,7 @@ func (s *DischargeModeHandler) RegisterOn(c mqtt.Client) {
 	tok2 := c.Subscribe(cmd_topic, 1, func(c mqtt.Client, m mqtt.Message) {
 		defer try.F(log.Println)
 		if s.lastState == nil {
-			return
+			s.lastState = ParseBase64([]byte(lastStateDefault))
 		}
 
 		data := DischargeMode{}
