@@ -18,12 +18,12 @@ type PVDCDataHandler struct {
 type PVDCData struct {
 	KaFlag0     int8
 	KaFlag1     int8
-	Ka1         int16
+	Ka1         int8
 	Ka2         int16
 	SolarPower0 int16
-	SolarPower1 int16
+	Ka3         int16
 	Ka4         int16
-	Ka5         int8
+	SolarPower1 int16
 }
 
 func (s *PVDCDataHandler) RegisterOn(c mqtt.Client) {
@@ -35,7 +35,7 @@ func (s *PVDCDataHandler) RegisterOn(c mqtt.Client) {
 
 		data := PVDCData{}
 		r := bytes.NewBuffer(ParseBase64(m.Payload()))
-		try.E(binary.Read(r, binary.LittleEndian, &data))
+		try.E(binary.Read(r, binary.BigEndian, &data))
 
 		log.Printf("Read PVDCData: %+v\n", data)
 
